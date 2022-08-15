@@ -1,6 +1,7 @@
 package main
 
 import (
+	"loveHome/models"
 	_ "loveHome/models"
 	_ "loveHome/routers"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 func main() {
 	ignoreStaticPath()
+	models.TestUploadByFilename("main.go")
 	beego.BConfig.WebConfig.Session.SessionOn = true
 	beego.Run()
 }
@@ -19,6 +21,8 @@ func main() {
 // 把原始网址补全
 func ignoreStaticPath() {
 	//透明static
+	beego.SetStaticPath("group1/M00/", "fdfs/storage_data/data/")
+
 	beego.InsertFilter("/", beego.BeforeRouter, TransparentStatic)
 	beego.InsertFilter("/*", beego.BeforeRouter, TransparentStatic)
 }
