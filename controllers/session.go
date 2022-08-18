@@ -53,6 +53,7 @@ func (c *SessionController) GetSessionData() {
 	}
 }
 
+// 登录
 func (c *SessionController) Login() {
 	//1.得到用户信息
 	resp := make(map[string]interface{})
@@ -92,7 +93,7 @@ func (c *SessionController) Login() {
 		return
 	}
 	//4.成功后添加session 保持登录状态
-	c.SetSession("name", resp["mobile"])
+	c.SetSession("name", user.Name)
 	c.SetSession("mobile", resp["mobile"])
 	c.SetSession("user_id", user.Id)
 

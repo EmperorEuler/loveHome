@@ -1,8 +1,7 @@
 package models
 
 import (
-	"loveHome/fdfs_client"
-
+	"github.com/keonjeo//fdfs_client"
 	"github.com/astaxie/beego"
 )
 

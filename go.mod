@@ -8,9 +8,12 @@ require (
 )
 
 require (
+	github.com/Sirupsen/logrus v1.0.6 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/keonjeo/fdfs_client v1.0.1 // indirect
+	github.com/keonjeo/goconfig v1.0.1 // indirect
 	github.com/neelance/astrewrite v0.0.0-20160511093645-99348263ae86 // indirect
 	github.com/neelance/sourcemap v0.0.0-20200213170602-2833bce08e4c // indirect
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
