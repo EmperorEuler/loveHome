@@ -76,9 +76,10 @@ func (c *SessionController) Login() {
 	o := orm.NewOrm()
 	user := models.User{Name: resp["mobile"].(string)}
 	//查询user表
-	qs := o.QueryTable("user")
+	//因为名字会改 所以修改为按手机查询
+	qs := o.QueryTable("mobile")
 	//过滤只查询mobile == user.name的，one（&user）返回数据到user结构体中，记得用地址
-	err := qs.Filter("mobile", user.Name).One(&user)
+	err := qs.Filter("mobile", user.Mobile).One(&user)
 	if err != nil {
 		beego.Info("o.Read(&user) err=====", err)
 		resp["errno"] = models.RECODE_DATAERR

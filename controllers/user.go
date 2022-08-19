@@ -2,11 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"fdfs_client"
 	"loveHome/models"
 	"path"
-
-	"loveHome/fdfs_client"
+	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/beego/beego/orm"
@@ -55,6 +53,7 @@ func (c *UserController) Reg() {
 
 }
 
+// 头像上传
 func (c *UserController) PostAvatar() {
 	resp := make(map[string]interface{})
 	defer c.RetDate(resp)
@@ -67,45 +66,42 @@ func (c *UserController) PostAvatar() {
 	}
 	//2.得到文件后缀
 	suffix := path.Ext(hd.Filename)
-	//3.存储文件到fdfs上
-	fdfsClient, err := fdfs_client.NewFdfsClient("../conf/client.conf")
-	if err != nil {
-		resp["errno"] = models.RECODE_REQERR
-		resp["errmsg"] = models.RecodeText(models.RECODE_REQERR)
-		return
-	}
+	//去除.jpg 的点
+	suffixStr := suffix[1:]
+	// //创建hd.Size大小的byte数组来存放fileData.Read读出来的 byte数据
 	fileBuffer := make([]byte, hd.Size)
+	// 读出得到数据存到[]byte
 	_, errBuffer := fileData.Read(fileBuffer)
 	if errBuffer != nil {
 		resp["errno"] = models.RECODE_REQERR
 		resp["errmsg"] = models.RecodeText(models.RECODE_REQERR)
 		return
 	}
-
-	DataResponse, err := fdfsClient.UploadAppenderByBuffer(fileBuffer, suffix[1:])
-	if err != nil {
-		resp["errno"] = models.RECODE_REQERR
-		resp["errmsg"] = models.RecodeText(models.RECODE_REQERR)
-		return
-	}
-
+	// 得到的文件存储在fastDFS上，得到fileid-url路径
+	uploadResponse, err := models.UploadByBuffer(fileBuffer, suffixStr)
+	RemoteFileId := strings.Replace(uploadResponse.RemoteFileId, `\\`, "/", -1)
 	//4.查从session拿user_id
 	user_id := c.GetSession("user_id")
 	//5.更新用户数据库内容
+	//创建一个user对象，用来往结构提中放数据
 	var user models.User
+	//获取句柄
 	o := orm.NewOrm()
+	//查询
 	qs := o.QueryTable("user")
 	qs.Filter("Id", user_id).One(&user)
-	user.Avatar_url = DataResponse.RemoteFileId
-
+	//把图片的远程路径存放到 user..url
+	user.Avatar_url = RemoteFileId
+	//将user结构体更新到数据库
 	_, errUpdate := o.Update(&user)
 	if errUpdate != nil {
 		resp["errno"] = models.RECODE_REQERR
 		resp["errmsg"] = models.RecodeText(models.RECODE_REQERR)
 		return
 	}
+	//拼接
 	urlMap := make(map[string]string)
-	urlMap["avatar_url"] = "192.168.58.129:8080/" + DataResponse.RemoteFileId
+	urlMap["avatar_url"] = "192.168.58.129:8080/" + RemoteFileId
 	resp["errno"] = models.RECODE_OK
 	resp["errmsg"] = models.RecodeText(models.RECODE_OK)
 	resp["data"] = urlMap
@@ -125,7 +121,9 @@ func (c *UserController) GetUserData() {
 		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
 		return
 	}
-
+	//取数据返回前端
+	//路径问题解决
+	user.Avatar_url = "127.0.0.1:8080/" + user.Avatar_url
 	resp["data"] = &user
 	resp["errno"] = models.RECODE_OK
 	resp["errmsg"] = models.RecodeText(models.RECODE_OK)
@@ -164,6 +162,7 @@ func (c *UserController) UpdateUserName() {
 	resp["errmsg"] = models.RecodeText(models.RECODE_OK)
 }
 
+// 实名认证
 func (c *UserController) PostRealName() {
 	resp := make(map[string]interface{})
 	defer c.RetDate(resp)
@@ -181,7 +180,7 @@ func (c *UserController) PostRealName() {
 		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
 		return
 	}
-
+	//更新用户名
 	user.Real_name = RealName["real_name"]
 	user.Id_card = RealName["id_card"]
 	_, err := o.Update(&user)
@@ -190,6 +189,7 @@ func (c *UserController) PostRealName() {
 		resp["errmsg"] = models.RecodeText(models.RECODE_DBERR)
 		return
 	}
+	//更新session 确保时间刷新
 	c.SetSession("user_id", user.Id)
 	//4.打包
 	resp["errno"] = models.RECODE_OK

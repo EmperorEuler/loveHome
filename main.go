@@ -15,6 +15,11 @@ func main() {
 	ignoreStaticPath()
 	models.TestUploadByFilename("main.go")
 	beego.BConfig.WebConfig.Session.SessionOn = true
+
+	//测试fdfs上传
+	// groupname,fileid,err := models.TestUploadByFilename(("static/images/home01.jpg"))
+	// beego.Info(groupname,fileid,err)
+
 	beego.Run()
 }
 

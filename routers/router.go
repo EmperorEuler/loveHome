@@ -18,5 +18,11 @@ func init() {
 	beego.Router("/api/v1.0/user/name", &controllers.UserController{}, "put:UpdateUserName")
 	beego.Router("/api/v1.0/user/auth", &controllers.UserController{}, "get:GetUserData;post:PostRealName")
 	beego.Router("/api/v1.0/user/houses", &controllers.UserController{}, "get:GetHouseData")
-
+	beego.Router("/api/v1.0/houses", &controllers.HouseController{}, "post:PostHouseData")
+	beego.Router("/api/v1.0/houses/?:id/images", &controllers.HouseController{}, "post:UploadHouseImage")
+	beego.Router("/api/v1.0/houses/?:id", &controllers.HouseController{}, "get:GetDetailHouseData")
+	beego.Router("/api/v1.0/user/orders", &controllers.OrderController{}, "get:GetOrderData")
+	beego.Router("/api/v1.0/orders", &controllers.OrderController{}, "post:PostOrderHouseData")
+	beego.Router("/api/v1.0/orders/:id/status", &controllers.OrderController{}, "put:OrderStatus")
+	beego.Router("/api/v1.0/orders/:id/comment", &controllers.OrderController{}, "put:OrderComment")
 }
